@@ -13,19 +13,28 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/yusirdemir/microservice/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 // -----------------------------------------------------------------------------
+// Version Variable
+// -----------------------------------------------------------------------------
+var Version = "dev"
+
+// -----------------------------------------------------------------------------
 // Global Metrics Definition
 // -----------------------------------------------------------------------------
 var (
+	buildInfo = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "app_build_info",
+		Help: "Application build version and info",
+	}, []string{"version", "app_name"})
 	httpRequestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "http_requests_total",
 		Help: "Total number of HTTP requests processed",
 	}, []string{"method", "path", "status"})
-
 	httpRequestDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "http_request_duration_seconds",
 		Help:    "Duration of HTTP requests in seconds",
@@ -35,27 +44,52 @@ var (
 
 func main() {
 	// -------------------------------------------------------------------------
-	// 1. Logger Configuration (Zap)
+	// Configuration Loading
 	// -------------------------------------------------------------------------
-	config := zap.NewProductionConfig()
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		panic("Failed to load configuration: " + err.Error())
+	}
 
-	logger, err := config.Build()
+	// -------------------------------------------------------------------------
+	// Logger Configuration (Zap)
+	// -------------------------------------------------------------------------
+	logConfig := zap.NewProductionConfig()
+	logConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	zapLevel, err := zapcore.ParseLevel(cfg.Logger.Level)
+	if err != nil {
+		panic("Failed to parse log level: " + err.Error())
+	}
+	logConfig.Level = zap.NewAtomicLevelAt(zapLevel)
+
+	logger, err := logConfig.Build()
 	if err != nil {
 		panic("Failed to initialize logger: " + err.Error())
 	}
-	defer logger.Sync()
+
+	defer func() {
+		_ = logger.Sync()
+	}()
+
+	logger.Info("Starting application",
+		zap.String("app", cfg.App.Name),
+		zap.String("version", Version),
+		zap.String("env", cfg.App.Env),
+	)
+
+	buildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)
 
 	// -------------------------------------------------------------------------
-	// 2. Fiber Application Setup
+	// Fiber Application Setup
 	// -------------------------------------------------------------------------
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
-		AppName:               "User Microservice v1",
+		AppName:               cfg.App.Name,
 	})
 
 	// -------------------------------------------------------------------------
-	// 3. Custom Metrics Middleware
+	// Custom Metrics Middleware
 	// -------------------------------------------------------------------------
 	app.Use(func(c *fiber.Ctx) error {
 		start := time.Now()
@@ -80,12 +114,12 @@ func main() {
 	})
 
 	// -------------------------------------------------------------------------
-	// 4. Metrics Endpoint
+	// Metrics Endpoint
 	// -------------------------------------------------------------------------
 	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	// -------------------------------------------------------------------------
-	// 5. Logging Middleware (FiberZap)
+	// Logging Middleware (FiberZap)
 	// -------------------------------------------------------------------------
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger,
@@ -93,7 +127,7 @@ func main() {
 	}))
 
 	// -------------------------------------------------------------------------
-	// 6. Lifecycle Hooks
+	// Lifecycle Hooks
 	// -------------------------------------------------------------------------
 	app.Hooks().OnListen(func(data fiber.ListenData) error {
 		logger.Info("Server started successfully",
@@ -105,7 +139,7 @@ func main() {
 	})
 
 	// -------------------------------------------------------------------------
-	// 7. Application Routes
+	// Application Routes
 	// -------------------------------------------------------------------------
 	app.Get("/", func(c *fiber.Ctx) error {
 		time.Sleep(5 * time.Second)
@@ -118,25 +152,32 @@ func main() {
 	})
 
 	// -------------------------------------------------------------------------
-	// 8. Server Start
+	// Server Start (Background)
 	// -------------------------------------------------------------------------
 	go func() {
-		logger.Info("Starting server...", zap.String("port", ":3000"))
-		if err := app.Listen(":3000"); err != nil {
+		port := ":" + cfg.App.Port
+		logger.Info("Initializing server...", zap.String("address", port))
+
+		if err := app.Listen(port); err != nil {
 			logger.Fatal("Server failed to start", zap.Error(err))
 		}
 	}()
 
+	// -------------------------------------------------------------------------
+	// Graceful Shutdown Mechanism
+	// -------------------------------------------------------------------------
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
-	logger.Info("Shutting down gracefully...")
 
+	<-c
+
+	logger.Info("Shutdown signal received. Shutting down gracefully...")
 	if err := app.ShutdownWithTimeout(10 * time.Second); err != nil {
-		logger.Error("Failed to shutdown", zap.Error(err))
+		logger.Error("Server forced to shutdown", zap.Error(err))
 	} else {
 		logger.Info("Server shutdown successfully")
 	}
-	logger.Sync()
+
+	_ = logger.Sync()
 	logger.Info("Goodbye!")
 }

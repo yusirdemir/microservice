@@ -1,0 +1,7 @@
+app:
+  name: "User-Service"
+  env: "development"
+  port: "3000"
+
+logger:
+  level: "debug" # debug, info, warn, error
