@@ -1,14 +1,11 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
 	"github.com/yusirdemir/microservice/internal/middleware"
 	"github.com/yusirdemir/microservice/internal/server"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"github.com/yusirdemir/microservice/pkg/logger"
+	"github.com/yusirdemir/microservice/pkg/shutdown"
 	"go.uber.org/zap"
 )
 
@@ -44,17 +41,9 @@ func main() {
 		}
 	}()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	<-c
-
-	log.Info("Shutdown signal received. Shutting down gracefully...")
-	if err := srv.Shutdown(); err != nil {
-		log.Error("Server forced to shutdown", zap.Error(err))
-	} else {
-		log.Info("Server shutdown successfully")
-	}
+	shutdown.Wait(log, func() error {
+		return srv.Shutdown()
+	})
 
 	_ = log.Sync()
 	log.Info("Goodbye!")
