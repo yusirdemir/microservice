@@ -8,16 +8,30 @@ This project provides a robust, high-performance foundation for building scalabl
 
 * **Production-Grade Architecture:** Built on **Fiber** for speed, with clean code principles and graceful shutdown.
 * **Full Observability:** Pre-configured **Prometheus** metrics and a professional **Grafana** Command Center dashboard.
+* **Production-Grade Architecture:** Built on **Fiber** for speed, with clean code principles and graceful shutdown.
+* **Full Observability:** Pre-configured **Prometheus** metrics and a professional **Grafana** Command Center dashboard.
 * **DevOps Ready:** Ultra-lightweight Docker images (~15MB), multi-stage builds, and orchestrated via `docker-compose`.
 * **Dynamic Configuration:** Environment-aware settings (`dev`, `prod`) with hot-reloading capabilities.
 * **Secure by Default:** Runs as a non-root user inside containers.
 
 ## 🛠️ Quick Start
 
-Get the entire stack (App + Prometheus + Grafana) running with a single command:
+**1. Start Everything (App + Monitoring):**
 
 ```bash
-docker-compose up -d --build
+make all
+```
+
+**2. Start Only the App:**
+
+```bash
+make up
+```
+
+**3. Start Only Monitoring:**
+
+```bash
+make infra
 ```
 
 ### Access Points
