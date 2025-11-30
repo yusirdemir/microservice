@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -27,7 +28,13 @@ func LoadConfig() (*Config, error) {
 
 	v.AddConfigPath(".")
 	v.AddConfigPath("./config")
-	v.SetConfigName("config")
+
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	v.SetConfigName("config." + env)
 	v.SetConfigType("yaml")
 
 	v.AutomaticEnv()
@@ -45,6 +52,8 @@ func LoadConfig() (*Config, error) {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("error parsing config: %w", err)
 	}
+
+	cfg.App.Env = env
 
 	return &cfg, nil
 }

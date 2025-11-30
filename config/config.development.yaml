@@ -1,0 +1,6 @@
+app:
+  name: "User-Service"
+  port: "3000"
+
+logger:
+  level: "debug"
