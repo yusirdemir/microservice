@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const DefaultPort = "3000"
+
 type Config struct {
 	App    AppConfig    `mapstructure:"app"`
 	Logger LoggerConfig `mapstructure:"logger"`
@@ -37,9 +39,10 @@ func LoadConfig() (*Config, error) {
 	v.SetConfigName("config." + env)
 	v.SetConfigType("yaml")
 
-	v.AutomaticEnv()
+	v.SetDefault("app.port", DefaultPort)
 
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

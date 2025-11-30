@@ -1,6 +1,5 @@
 app:
   name: "User-Service"
-  port: "3001"
 
 logger:
   level: "error"

@@ -2,4 +2,4 @@ app:
   name: "User-Service"
 
 logger:
-  level: "debug"
+  level: "info"
