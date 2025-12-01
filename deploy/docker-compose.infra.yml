@@ -27,6 +27,18 @@ services:
       - microservice-net
     restart: unless-stopped
 
+  couchbase:
+    container_name: couchbase
+    image: couchbase/server:7.2.0
+    ports:
+      - "8091-8094:8091-8094"
+      - "11210:11210"
+    volumes:
+      - microservice-couchbase-data:/opt/couchbase/var
+    networks:
+      - microservice-net
+    restart: unless-stopped
+
 networks:
   microservice-net:
     name: microservice-network
@@ -37,3 +49,5 @@ volumes:
     name: microservice-grafana-data
   microservice-prometheus-data:
     name: microservice-prometheus-data
+  microservice-couchbase-data:
+    name: microservice-couchbase-data

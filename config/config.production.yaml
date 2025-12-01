@@ -8,3 +8,10 @@ server:
 
 logger:
   level: "info"
+
+database:
+  driver: "couchbase"
+  host: "couchbase"
+  bucket: "default"
+  username: "Administrator"
+  password: "123456"

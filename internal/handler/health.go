@@ -10,9 +10,9 @@ func NewHealthHandler() *HealthHandler {
 	return &HealthHandler{}
 }
 
-func (h *HealthHandler) Register(router fiber.Router) {
-	router.Get("/health/live", h.Live)
-	router.Get("/health/ready", h.Ready)
+func (h *HealthHandler) Register(r fiber.Router) {
+	r.Get("/health/live", h.Live)
+	r.Get("/health/ready", h.Ready)
 }
 
 func (h *HealthHandler) Live(c *fiber.Ctx) error {

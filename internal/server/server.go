@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -11,9 +12,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/yusirdemir/microservice/internal/handler"
 	"github.com/yusirdemir/microservice/internal/middleware"
+	"github.com/yusirdemir/microservice/internal/repository"
+	"github.com/yusirdemir/microservice/internal/repository/couchbase"
+	"github.com/yusirdemir/microservice/internal/repository/memory"
 	"github.com/yusirdemir/microservice/internal/router"
+	"github.com/yusirdemir/microservice/internal/service"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Server struct {
@@ -34,6 +40,11 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	idleTimeout, err := time.ParseDuration(cfg.Server.IdleTimeout)
 	if err != nil {
 		return nil, err
+	}
+
+	logLevel, err := zapcore.ParseLevel(cfg.Logger.Level)
+	if err != nil {
+		logLevel = zapcore.InfoLevel
 	}
 
 	app := fiber.New(fiber.Config{
@@ -58,6 +69,10 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	app.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger,
 		Fields: []string{"latency", "status", "method", "url", "ip", "ua"},
+		Levels: []zapcore.Level{zapcore.ErrorLevel, zapcore.WarnLevel, logLevel},
+		Next: func(c *fiber.Ctx) bool {
+			return c.Path() == "/health/live" || c.Path() == "/health/ready"
+		},
 	}))
 
 	app.Hooks().OnListen(func(data fiber.ListenData) error {
@@ -69,9 +84,27 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 		return nil
 	})
 
+	var userRepo repository.UserRepository
+	var errRepo error
+
+	switch cfg.Database.Driver {
+	case "couchbase":
+		userRepo, errRepo = couchbase.NewUserRepository(cfg)
+	case "memory":
+		userRepo = memory.NewUserRepository()
+	default:
+		userRepo = memory.NewUserRepository()
+	}
+
+	if errRepo != nil {
+		return nil, fmt.Errorf("failed to initialize repository: %w", errRepo)
+	}
+
+	userService := service.NewUserService(userRepo)
+
 	handlers := []router.RouteHandler{
+		handler.NewUserHandler(userService),
 		handler.NewHealthHandler(),
-		handler.NewUserHandler(),
 		handler.NewTimeoutHandler(),
 	}
 

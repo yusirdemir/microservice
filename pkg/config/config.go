@@ -11,9 +11,18 @@ import (
 const DefaultPort = "3000"
 
 type Config struct {
-	App    AppConfig    `mapstructure:"app"`
-	Server ServerConfig `mapstructure:"server"`
-	Logger LoggerConfig `mapstructure:"logger"`
+	App      AppConfig      `mapstructure:"app"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Logger   LoggerConfig   `mapstructure:"logger"`
+	Database DatabaseConfig `mapstructure:"database"`
+}
+
+type DatabaseConfig struct {
+	Driver   string `mapstructure:"driver"`
+	Host     string `mapstructure:"host"`
+	Bucket   string `mapstructure:"bucket"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 type ServerConfig struct {
