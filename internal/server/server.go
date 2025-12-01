@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/timeout"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/yusirdemir/microservice/internal/handler"
 	"github.com/yusirdemir/microservice/internal/middleware"
@@ -43,6 +44,13 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 		IdleTimeout:           idleTimeout,
 	})
 
+	app.Use(func(c *fiber.Ctx) error {
+		h := timeout.NewWithContext(func(c *fiber.Ctx) error {
+			return c.Next()
+		}, writeTimeout)
+		return h(c)
+	})
+
 	app.Use(middleware.Metrics)
 
 	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
@@ -64,6 +72,7 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	handlers := []router.RouteHandler{
 		handler.NewHealthHandler(),
 		handler.NewUserHandler(),
+		handler.NewTimeoutHandler(),
 	}
 
 	r := router.New(app, handlers)
