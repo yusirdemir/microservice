@@ -21,10 +21,26 @@ type Server struct {
 	Logger *zap.Logger
 }
 
-func New(cfg *config.Config, logger *zap.Logger) *Server {
+func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
+	readTimeout, err := time.ParseDuration(cfg.Server.ReadTimeout)
+	if err != nil {
+		return nil, err
+	}
+	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)
+	if err != nil {
+		return nil, err
+	}
+	idleTimeout, err := time.ParseDuration(cfg.Server.IdleTimeout)
+	if err != nil {
+		return nil, err
+	}
+
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		AppName:               cfg.App.Name,
+		ReadTimeout:           readTimeout,
+		WriteTimeout:          writeTimeout,
+		IdleTimeout:           idleTimeout,
 	})
 
 	app.Use(middleware.Metrics)
@@ -57,7 +73,7 @@ func New(cfg *config.Config, logger *zap.Logger) *Server {
 		App:    app,
 		Config: cfg,
 		Logger: logger,
-	}
+	}, nil
 }
 
 func (s *Server) Run() error {

@@ -1,5 +1,10 @@
 app:
   name: "User-Service"
 
+server:
+  read_timeout: "5s"
+  write_timeout: "10s"
+  idle_timeout: "120s"
+
 logger:
   level: "info"

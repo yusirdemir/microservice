@@ -33,7 +33,10 @@ func main() {
 
 	middleware.BuildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)
 
-	srv := server.New(cfg, log)
+	srv, err := server.New(cfg, log)
+	if err != nil {
+		log.Fatal("Failed to initialize server", zap.Error(err))
+	}
 
 	go func() {
 		if err := srv.Run(); err != nil {

@@ -12,7 +12,14 @@ const DefaultPort = "3000"
 
 type Config struct {
 	App    AppConfig    `mapstructure:"app"`
+	Server ServerConfig `mapstructure:"server"`
 	Logger LoggerConfig `mapstructure:"logger"`
+}
+
+type ServerConfig struct {
+	ReadTimeout  string `mapstructure:"read_timeout"`
+	WriteTimeout string `mapstructure:"write_timeout"`
+	IdleTimeout  string `mapstructure:"idle_timeout"`
 }
 
 type AppConfig struct {
@@ -45,10 +52,9 @@ func LoadConfig() (*Config, error) {
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return nil, fmt.Errorf("config not found")
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, fmt.Errorf("error reading config: %w", err)
 		}
-		return nil, fmt.Errorf("error reading config: %w", err)
 	}
 
 	var cfg Config
