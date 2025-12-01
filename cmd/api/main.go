@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/yusirdemir/microservice/internal/middleware"
+	"github.com/yusirdemir/microservice/internal/metrics"
 	"github.com/yusirdemir/microservice/internal/server"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"github.com/yusirdemir/microservice/pkg/logger"
@@ -31,7 +31,7 @@ func main() {
 		zap.String("env", cfg.App.Env),
 	)
 
-	middleware.BuildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)
+	metrics.BuildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)
 
 	srv, err := server.New(cfg, log)
 	if err != nil {

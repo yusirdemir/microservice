@@ -10,17 +10,17 @@ RUN go mod download
 
 COPY . .
 
-ARG VERSION=dev
-
+ARG FRAMEWORK=fiber
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-s -w -X main.Version=${VERSION}" \
+    -tags "${FRAMEWORK}" \
+    -ldflags="-s -w -X main.version=1.0.0" \
     -o microservice \
-    ./cmd/api/main.go
+    cmd/api/main.go
 
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags="-s -w" \
     -o healthcheck \
-    ./cmd/healthcheck/main.go
+    cmd/healthcheck/main.go
 
 FROM scratch
 
