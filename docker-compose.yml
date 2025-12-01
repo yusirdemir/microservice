@@ -12,6 +12,7 @@ services:
     environment:
       - APP_ENV=${APP_ENV}
       - APP_PORT=${APP_PORT}
+      - APP_FRAMEWORK=${APP_FRAMEWORK}
     networks:
       - microservice-net
     restart: unless-stopped
