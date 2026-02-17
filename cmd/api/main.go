@@ -1,10 +1,8 @@
 package main
 
 import (
-	"os"
-
 	"github.com/yusirdemir/microservice/internal/metrics"
-	"github.com/yusirdemir/microservice/internal/server"
+	"github.com/yusirdemir/microservice/internal/transport/http/server"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"github.com/yusirdemir/microservice/pkg/logger"
 	"github.com/yusirdemir/microservice/pkg/shutdown"
@@ -31,7 +29,6 @@ func main() {
 		zap.String("app", cfg.App.Name),
 		zap.String("version", Version),
 		zap.String("env", cfg.App.Env),
-		zap.String("framework", os.Getenv("APP_FRAMEWORK")),
 	)
 
 	metrics.BuildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)

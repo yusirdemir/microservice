@@ -48,6 +48,29 @@ make infra
 | `GET` | `/error` | **Test Route:** Triggers a 500 error to test monitoring alerts |
 | `GET` | `/metrics` | Exposes Prometheus metrics |
 
+## 👩‍💻 Development Guide
+
+### Adding a New Endpoint
+
+Since the project uses **Fiber** and follows a **Hexagonal Architecture**, here is the standard flow to add a new feature:
+
+1. **Define the Interface (Port):**
+    * Create a new method in the `Service` interface (`internal/service/service.go`) if needed.
+    * Create a new method in the `Repository` interface (`internal/repository/repository.go`) if database access is required.
+
+2. **Implement the Business Logic (Service):**
+    * Implement the method in `internal/service/user_service.go` (or create a new service).
+
+3. **Implement the Handler (Adapter):**
+    * Create a new handler method in `internal/transport/http/handler/`.
+    * Use `fiber.Ctx` to get inputs and return responses.
+
+4. **Register the Route:**
+    * Add the new route in `internal/transport/http/router/router.go`.
+    * Bind it to the handler method.
+
+---
+
 ## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details. You are free to use, modify, and distribute this software as you wish.
