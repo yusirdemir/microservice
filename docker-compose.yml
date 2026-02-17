@@ -6,13 +6,11 @@ services:
       dockerfile: Dockerfile
       args:
         VERSION: "${VERSION}"
-        FRAMEWORK: "${APP_FRAMEWORK}"
     ports:
       - "${APP_PORT}:${APP_PORT}"
     environment:
       - APP_ENV=${APP_ENV}
       - APP_PORT=${APP_PORT}
-      - APP_FRAMEWORK=${APP_FRAMEWORK}
     networks:
       - microservice-net
     restart: unless-stopped
