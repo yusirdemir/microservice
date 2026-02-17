@@ -85,15 +85,18 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	})
 
 	var userRepo repository.UserRepository
+	var productRepo repository.ProductRepository
 	var errRepo error
 
 	switch cfg.Database.Driver {
 	case "couchbase":
 		userRepo, errRepo = couchbase.NewUserRepository(cfg)
-	case "memory":
-		userRepo = memory.NewUserRepository()
+		if errRepo == nil {
+			productRepo, errRepo = couchbase.NewProductRepository(cfg)
+		}
 	default:
 		userRepo = memory.NewUserRepository()
+		productRepo = memory.NewProductRepository()
 	}
 
 	if errRepo != nil {
@@ -101,9 +104,11 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	}
 
 	userService := service.NewUserService(userRepo)
+	productService := service.NewProductService(productRepo)
 
 	handlers := []router.RouteHandler{
 		handler.NewUserHandler(userService),
+		handler.NewProductHandler(productService),
 		handler.NewHealthHandler(),
 		handler.NewTimeoutHandler(),
 	}
