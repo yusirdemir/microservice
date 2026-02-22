@@ -21,6 +21,7 @@ import (
 	"github.com/yusirdemir/microservice/internal/transport/http/router"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"github.com/yusirdemir/microservice/pkg/telemetry"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -32,6 +33,11 @@ type Server struct {
 }
 
 func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error) {
+	tracer, err := telemetry.InitTracer(cfg.App.Name, version, cfg.App.Env, cfg.Trace.Endpoint)
+	if err != nil {
+		logger.Error("Failed to init tracer", zap.Error(err))
+	}
+
 	readTimeout, err := time.ParseDuration(cfg.Server.ReadTimeout)
 	if err != nil {
 		return nil, err
@@ -64,6 +70,14 @@ func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error
 		}, writeTimeout)
 		return h(c)
 	})
+
+	if tracer != nil {
+		app.Use(otelfiber.Middleware(otelfiber.WithTracerProvider(otel.GetTracerProvider())))
+		app.Hooks().OnShutdown(func() error {
+			return tracer.Shutdown(context.Background())
+		})
+		logger.Info("OpenTelemetry tracer initialized and middleware added at the top")
+	}
 
 	app.Use(middleware.Metrics)
 
@@ -118,18 +132,6 @@ func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error
 
 	r := router.New(app, handlers)
 	r.SetupRoutes()
-
-	tracer, err := telemetry.InitTracer(cfg.App.Name, version, cfg.App.Env, cfg.Trace.Endpoint)
-	if err != nil {
-		logger.Error("Failed to init tracer", zap.Error(err))
-	} else {
-		app.Hooks().OnShutdown(func() error {
-			return tracer.Shutdown(context.Background())
-		})
-
-		app.Use(otelfiber.Middleware())
-		logger.Info("OpenTelemetry tracer initialized and middleware added")
-	}
 
 	return &Server{
 		App:    app,
