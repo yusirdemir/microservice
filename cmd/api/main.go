@@ -1,6 +1,11 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/yusirdemir/microservice/internal/metrics"
 	"github.com/yusirdemir/microservice/internal/transport/http/server"
 	"github.com/yusirdemir/microservice/pkg/config"
@@ -12,6 +17,9 @@ import (
 var Version = "dev"
 
 func main() {
+	appCtx, cancelApp := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancelApp()
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		panic("Failed to load configuration: " + err.Error())
@@ -44,7 +52,7 @@ func main() {
 		}
 	}()
 
-	shutdown.Wait(log, func() error {
+	shutdown.Wait(appCtx, log, func() error {
 		return srv.Shutdown()
 	})
 

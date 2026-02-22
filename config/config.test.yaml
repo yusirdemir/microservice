@@ -1,5 +1,7 @@
 app:
-  name: "User-Service"
+  name: "Microservice"
+  port: "3001"
+  env: "test"
 
 server:
   read_timeout: "5s"
@@ -7,11 +9,15 @@ server:
   idle_timeout: "120s"
 
 logger:
-  level: "debug"
+  level: "error"
 
 database:
   driver: "memory"
-  host: "localhost"
-  bucket: "default"
-  username: "Administrator"
-  password: "123456"
+  host: ""
+  bucket: ""
+  username: ""
+  password: ""
+
+trace:
+  exporter: "noop"
+  endpoint: ""

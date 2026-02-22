@@ -1,20 +1,15 @@
 package shutdown
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
+	"context"
 
 	"go.uber.org/zap"
 )
 
 type CleanupFunc func() error
 
-func Wait(logger *zap.Logger, cleanup CleanupFunc) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	<-c
+func Wait(ctx context.Context, logger *zap.Logger, cleanup CleanupFunc) {
+	<-ctx.Done()
 
 	logger.Info("Shutdown signal received. Shutting down gracefully...")
 

@@ -27,6 +27,19 @@ services:
       - microservice-net
     restart: unless-stopped
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      - microservice-net
+    restart: unless-stopped
+
   couchbase:
     container_name: couchbase
     image: couchbase/server:7.2.0
@@ -38,6 +51,10 @@ services:
     networks:
       - microservice-net
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 200000
+        hard: 200000
 
 networks:
   microservice-net:

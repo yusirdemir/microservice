@@ -1,5 +1,7 @@
 app:
-  name: "User-Service"
+  name: "Microservice"
+  port: "3000"
+  env: "production"
 
 server:
   read_timeout: "5s"
@@ -12,6 +14,10 @@ logger:
 database:
   driver: "couchbase"
   host: "couchbase"
-  bucket: "default"
-  username: "Administrator"
-  password: "123456"
+  bucket: "microservice-bucket"
+  username: "admin"
+  password: "password"
+
+trace:
+  exporter: "jaeger"
+  endpoint: "http://jaeger:4318"

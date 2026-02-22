@@ -1,6 +1,6 @@
 services:
-  user-service:
-    container_name: user-service
+  microservice:
+    container_name: microservice
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,8 +9,9 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}"
     environment:
-      - APP_ENV=${APP_ENV}
       - APP_PORT=${APP_PORT}
+      - APP_ENV=${APP_ENV}
+      - TRACE_ENDPOINT=jaeger:4318
     networks:
       - microservice-net
     restart: unless-stopped

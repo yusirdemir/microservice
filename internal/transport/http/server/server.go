@@ -1,12 +1,14 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/contrib/fiberzap/v2"
+	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/timeout"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -18,6 +20,7 @@ import (
 	"github.com/yusirdemir/microservice/internal/transport/http/middleware"
 	"github.com/yusirdemir/microservice/internal/transport/http/router"
 	"github.com/yusirdemir/microservice/pkg/config"
+	"github.com/yusirdemir/microservice/pkg/telemetry"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -115,6 +118,18 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 
 	r := router.New(app, handlers)
 	r.SetupRoutes()
+
+	tracer, err := telemetry.InitTracer(cfg.App.Name, "1.0.0", cfg.App.Env, cfg.Trace.Endpoint)
+	if err != nil {
+		logger.Error("Failed to init tracer", zap.Error(err))
+	} else {
+		app.Hooks().OnShutdown(func() error {
+			return tracer.Shutdown(context.Background())
+		})
+
+		app.Use(otelfiber.Middleware())
+		logger.Info("OpenTelemetry tracer initialized and middleware added")
+	}
 
 	return &Server{
 		App:    app,

@@ -2,7 +2,7 @@
 
 help:
 	@echo "Available commands:"
-	@echo "  make up          - Start the application (User Service)"
+	@echo "  make up          - Start the application (Microservice)"
 	@echo "  make down        - Stop the application"
 	@echo "  make infra       - Start the monitoring stack (Prometheus + Grafana)"
 	@echo "  make infra-down  - Stop the monitoring stack"

@@ -14,6 +14,7 @@ type Config struct {
 	Server   ServerConfig   `yaml:"server" env-prefix:"SERVER_"`
 	Logger   LoggerConfig   `yaml:"logger" env-prefix:"LOGGER_"`
 	Database DatabaseConfig `yaml:"database" env-prefix:"DATABASE_"`
+	Trace    TraceConfig    `yaml:"trace" env-prefix:"TRACE_"`
 }
 
 type DatabaseConfig struct {
@@ -31,13 +32,18 @@ type ServerConfig struct {
 }
 
 type AppConfig struct {
-	Name string `yaml:"name" env:"NAME" env-default:"User Service"`
+	Name string `yaml:"name" env:"NAME" env-default:"Microservice"`
 	Port string `yaml:"port" env:"PORT" env-default:"3000"`
 	Env  string `yaml:"env" env:"ENV" env-default:"development"`
 }
 
 type LoggerConfig struct {
 	Level string `yaml:"level" env:"LEVEL" env-default:"info"`
+}
+
+type TraceConfig struct {
+	Exporter string `yaml:"exporter" env:"EXPORTER" env-default:"jaeger"`
+	Endpoint string `yaml:"endpoint" env:"ENDPOINT" env-default:"localhost:4318"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -48,7 +54,6 @@ func LoadConfig() (*Config, error) {
 		env = "development"
 	}
 
-	// Try to look for config files in logical places
 	paths := []string{
 		fmt.Sprintf("config.%s.yaml", env),
 		fmt.Sprintf("config/config.%s.yaml", env),
@@ -62,7 +67,6 @@ func LoadConfig() (*Config, error) {
 		}
 	}
 
-	// Load from file if exists, otherwise load from env
 	if configPath != "" {
 		if err := cleanenv.ReadConfig(configPath, cfg); err != nil {
 			return nil, fmt.Errorf("failed to read config file '%s': %w", configPath, err)

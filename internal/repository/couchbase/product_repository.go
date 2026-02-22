@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"time"
 
+	cbopentelemetry "github.com/couchbase/gocb-opentelemetry"
 	"github.com/couchbase/gocb/v2"
 	"github.com/yusirdemir/microservice/internal/domain"
 	"github.com/yusirdemir/microservice/internal/repository"
 	"github.com/yusirdemir/microservice/pkg/config"
+	"go.opentelemetry.io/otel"
 )
 
 type couchbaseProductRepository struct {
@@ -35,6 +37,7 @@ func NewProductRepository(cfg *config.Config) (repository.ProductRepository, err
 			Username: cfg.Database.Username,
 			Password: cfg.Database.Password,
 		},
+		Tracer: cbopentelemetry.NewOpenTelemetryRequestTracer(otel.GetTracerProvider()),
 	})
 	if err != nil {
 		return nil, err

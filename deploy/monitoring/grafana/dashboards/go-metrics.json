@@ -87,7 +87,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "time() - process_start_time_seconds{job=\"user-service\"}",
+                    "expr": "time() - process_start_time_seconds{job=\"microservice\"}",
                     "legendFormat": "",
                     "refId": "A"
                 }
@@ -148,7 +148,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "sum(rate(http_requests_total{job=\"user-service\"}[1m]))",
+                    "expr": "sum(rate(http_requests_total{job=\"microservice\"}[1m]))",
                     "legendFormat": "",
                     "refId": "A"
                 }
@@ -205,7 +205,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "sum(rate(http_requests_total{job=\"user-service\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"user-service\"}[5m])) * 100",
+                    "expr": "sum(rate(http_requests_total{job=\"microservice\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"microservice\"}[5m])) * 100",
                     "legendFormat": "",
                     "refId": "A"
                 }
@@ -266,7 +266,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"user-service\"}[5m])) by (le))",
+                    "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"microservice\"}[5m])) by (le))",
                     "legendFormat": "",
                     "refId": "A"
                 }
@@ -356,17 +356,17 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "sum(rate(http_requests_total{job=\"user-service\", status=~\"2..\"}[1m]))",
+                    "expr": "sum(rate(http_requests_total{job=\"microservice\", status=~\"2..\"}[1m]))",
                     "legendFormat": "2xx Success",
                     "refId": "A"
                 },
                 {
-                    "expr": "sum(rate(http_requests_total{job=\"user-service\", status=~\"4..\"}[1m]))",
+                    "expr": "sum(rate(http_requests_total{job=\"microservice\", status=~\"4..\"}[1m]))",
                     "legendFormat": "4xx Client Error",
                     "refId": "B"
                 },
                 {
-                    "expr": "sum(rate(http_requests_total{job=\"user-service\", status=~\"5..\"}[1m]))",
+                    "expr": "sum(rate(http_requests_total{job=\"microservice\", status=~\"5..\"}[1m]))",
                     "legendFormat": "5xx Server Error",
                     "refId": "C"
                 }
@@ -444,17 +444,17 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"user-service\"}[5m])) by (le))",
+                    "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"microservice\"}[5m])) by (le))",
                     "legendFormat": "P99",
                     "refId": "A"
                 },
                 {
-                    "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"user-service\"}[5m])) by (le))",
+                    "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"microservice\"}[5m])) by (le))",
                     "legendFormat": "P95",
                     "refId": "B"
                 },
                 {
-                    "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"user-service\"}[5m])) by (le))",
+                    "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"microservice\"}[5m])) by (le))",
                     "legendFormat": "P50 (Median)",
                     "refId": "C"
                 }
@@ -545,7 +545,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "rate(process_cpu_seconds_total{job=\"user-service\"}[1m]) * 100",
+                    "expr": "rate(process_cpu_seconds_total{job=\"microservice\"}[1m]) * 100",
                     "legendFormat": "CPU Usage",
                     "refId": "A"
                 }
@@ -623,12 +623,12 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "go_memstats_alloc_bytes{job=\"user-service\"}",
+                    "expr": "go_memstats_alloc_bytes{job=\"microservice\"}",
                     "legendFormat": "Heap Alloc",
                     "refId": "A"
                 },
                 {
-                    "expr": "go_memstats_sys_bytes{job=\"user-service\"}",
+                    "expr": "go_memstats_sys_bytes{job=\"microservice\"}",
                     "legendFormat": "Sys",
                     "refId": "B"
                 }
@@ -705,7 +705,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "go_goroutines{job=\"user-service\"}",
+                    "expr": "go_goroutines{job=\"microservice\"}",
                     "legendFormat": "Goroutines",
                     "refId": "A"
                 }
@@ -770,7 +770,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "app_build_info{job=\"user-service\"}",
+                    "expr": "app_build_info{job=\"microservice\"}",
                     "format": "table",
                     "instant": true,
                     "refId": "A"
@@ -846,7 +846,7 @@
             "pluginVersion": "8.3.3",
             "targets": [
                 {
-                    "expr": "sum(increase(http_requests_total{job=\"user-service\"}[1h])) by (method, path, status)",
+                    "expr": "sum(increase(http_requests_total{job=\"microservice\"}[1h])) by (method, path, status)",
                     "format": "table",
                     "instant": true,
                     "refId": "A"
