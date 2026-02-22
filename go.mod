@@ -3,6 +3,7 @@ module github.com/yusirdemir/microservice
 go 1.25.4
 
 require (
+	github.com/couchbase/gocb-opentelemetry v0.3.0
 	github.com/couchbase/gocb/v2 v2.11.1
 	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/contrib/fiberzap/v2 v2.1.6
@@ -26,7 +27,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
-	github.com/couchbase/gocb-opentelemetry v0.3.0 // indirect
 	github.com/couchbase/gocbcore/v10 v10.8.1 // indirect
 	github.com/couchbase/gocbcoreps v0.1.4 // indirect
 	github.com/couchbase/goprotostellar v1.0.2 // indirect
