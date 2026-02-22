@@ -64,13 +64,6 @@ func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error
 		IdleTimeout:           idleTimeout,
 	})
 
-	app.Use(func(c *fiber.Ctx) error {
-		h := timeout.NewWithContext(func(c *fiber.Ctx) error {
-			return c.Next()
-		}, writeTimeout)
-		return h(c)
-	})
-
 	if tracer != nil {
 		app.Use(otelfiber.Middleware(otelfiber.WithTracerProvider(otel.GetTracerProvider())))
 		app.Hooks().OnShutdown(func() error {
@@ -78,6 +71,13 @@ func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error
 		})
 		logger.Info("OpenTelemetry tracer initialized and middleware added at the top")
 	}
+
+	app.Use(func(c *fiber.Ctx) error {
+		h := timeout.NewWithContext(func(c *fiber.Ctx) error {
+			return c.Next()
+		}, writeTimeout)
+		return h(c)
+	})
 
 	app.Use(middleware.Metrics)
 

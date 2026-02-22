@@ -12,6 +12,7 @@ import (
 	"github.com/yusirdemir/microservice/internal/repository"
 	"github.com/yusirdemir/microservice/pkg/config"
 	"go.opentelemetry.io/otel"
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 type couchbaseProductRepository struct {
@@ -71,14 +72,16 @@ func (r *couchbaseProductRepository) Create(ctx context.Context, product *domain
 	}
 
 	_, err := r.collection.Insert(product.ID, doc, &gocb.InsertOptions{
-		Context: ctx,
+		Context:    ctx,
+		ParentSpan: cbopentelemetry.NewOpenTelemetryRequestSpan(ctx, oteltrace.SpanFromContext(ctx)),
 	})
 	return err
 }
 
 func (r *couchbaseProductRepository) FindByID(ctx context.Context, id string) (*domain.Product, error) {
 	result, err := r.collection.Get(id, &gocb.GetOptions{
-		Context: ctx,
+		Context:    ctx,
+		ParentSpan: cbopentelemetry.NewOpenTelemetryRequestSpan(ctx, oteltrace.SpanFromContext(ctx)),
 	})
 	if err != nil {
 		if errors.Is(err, gocb.ErrDocumentNotFound) {
@@ -109,6 +112,7 @@ func (r *couchbaseProductRepository) FindAllByUserID(ctx context.Context, userID
 	rows, err := r.cluster.Query(query, &gocb.QueryOptions{
 		PositionalParameters: []any{userID},
 		Context:              ctx,
+		ParentSpan:           cbopentelemetry.NewOpenTelemetryRequestSpan(ctx, oteltrace.SpanFromContext(ctx)),
 	})
 	if err != nil {
 		return nil, err
@@ -148,14 +152,16 @@ func (r *couchbaseProductRepository) Update(ctx context.Context, product *domain
 	}
 
 	_, err := r.collection.Replace(product.ID, doc, &gocb.ReplaceOptions{
-		Context: ctx,
+		Context:    ctx,
+		ParentSpan: cbopentelemetry.NewOpenTelemetryRequestSpan(ctx, oteltrace.SpanFromContext(ctx)),
 	})
 	return err
 }
 
 func (r *couchbaseProductRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.collection.Remove(id, &gocb.RemoveOptions{
-		Context: ctx,
+		Context:    ctx,
+		ParentSpan: cbopentelemetry.NewOpenTelemetryRequestSpan(ctx, oteltrace.SpanFromContext(ctx)),
 	})
 	return err
 }
