@@ -41,7 +41,7 @@ func main() {
 
 	metrics.BuildInfo.WithLabelValues(Version, cfg.App.Name).Set(1)
 
-	srv, err := server.New(cfg, log)
+	srv, err := server.New(cfg, log, Version)
 	if err != nil {
 		log.Fatal("Failed to initialize server", zap.Error(err))
 	}

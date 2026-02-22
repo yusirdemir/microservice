@@ -31,7 +31,7 @@ type Server struct {
 	Logger *zap.Logger
 }
 
-func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
+func New(cfg *config.Config, logger *zap.Logger, version string) (*Server, error) {
 	readTimeout, err := time.ParseDuration(cfg.Server.ReadTimeout)
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func New(cfg *config.Config, logger *zap.Logger) (*Server, error) {
 	r := router.New(app, handlers)
 	r.SetupRoutes()
 
-	tracer, err := telemetry.InitTracer(cfg.App.Name, "1.0.0", cfg.App.Env, cfg.Trace.Endpoint)
+	tracer, err := telemetry.InitTracer(cfg.App.Name, version, cfg.App.Env, cfg.Trace.Endpoint)
 	if err != nil {
 		logger.Error("Failed to init tracer", zap.Error(err))
 	} else {

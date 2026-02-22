@@ -10,10 +10,9 @@ RUN go mod download
 
 COPY . .
 
-ARG FRAMEWORK=fiber
+ARG VERSION=1.0.0
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -tags "${FRAMEWORK}" \
-    -ldflags="-s -w -X main.version=1.0.0" \
+    -ldflags="-s -w -X main.Version=${VERSION}" \
     -o microservice \
     cmd/api/main.go
 

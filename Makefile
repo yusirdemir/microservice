@@ -1,3 +1,5 @@
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+
 .PHONY: up down infra infra-down all clean help
 
 help:
@@ -10,7 +12,7 @@ help:
 	@echo "  make clean       - Stop everything"
 
 up:
-	docker-compose up -d --build
+	VERSION=$(VERSION) docker-compose up -d --build
 
 down:
 	docker-compose down
